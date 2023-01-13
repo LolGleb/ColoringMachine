@@ -11,7 +11,7 @@ protocol EditColorViewControllerDelegate: AnyObject {
     func saveColor (color: UIColor)
 }
 
-class EditColorViewController: UIViewController {
+class EditColorViewController: UIViewController, UITextFieldDelegate {
 
     @IBOutlet var coloredView: UIView!
     
@@ -23,26 +23,38 @@ class EditColorViewController: UIViewController {
     @IBOutlet var greenSlider: UISlider!
     @IBOutlet var blueSlider: UISlider!
     
+    @IBOutlet var redTextField: UITextField!
+    @IBOutlet var greenTextField: UITextField!
+    @IBOutlet var blueTextField: UITextField!
+    
+    var startColor: UIColor!
+    
     weak var delegate: EditColorViewControllerDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.redTextField.delegate = self
+        self.greenTextField.delegate = self
+        self.blueTextField.delegate = self
         
         coloredView.layer.cornerRadius = 15
         
         // MARK: Red Slider
         redSlider.minimumTrackTintColor = .red
         redSlider.value = 10
+        redTextField.text?.append("10")
         
         // MARK: Green Slider
         greenSlider.minimumTrackTintColor = .green
         greenSlider.value = 60
+        greenTextField.text?.append("60")
         
         // MARK: Blue Slider
         blueSlider.value = 200
+        blueTextField.text?.append("200")
 
-        setColor()
         setValue(for: redLabel, greenLabel, blueLabel)
+        coloredView.backgroundColor = startColor
     }
 
     
@@ -50,9 +62,15 @@ class EditColorViewController: UIViewController {
         setColor()
         
         switch sender.tag {
-        case 0: redLabel.text = string(from: sender)
-        case 1: greenLabel.text = string(from: sender)
-        case 2: blueLabel.text = string(from: sender)
+        case 0:
+            redLabel.text = string(from: sender)
+            redTextField.text = string(from: sender)
+        case 1:
+            greenLabel.text = string(from: sender)
+            greenTextField.text = string(from: sender)
+        case 2:
+            blueLabel.text = string(from: sender)
+            blueTextField.text = string(from: sender)
         default: break
         }
     }
@@ -83,6 +101,32 @@ class EditColorViewController: UIViewController {
     
     private func string(from slider: UISlider) -> String {
         String(Int(slider.value))
+    }
+    
+    // MARK: - Everything about textFields
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if Int(textField.text!) ?? 0 > 255 {
+            textField.text = "255"
+        }
+        redLabel.text = redTextField.text
+        redSlider.value = Float(redTextField.text!) ?? 0.0
+        greenLabel.text = greenTextField.text
+        greenSlider.value = Float(greenTextField.text!) ?? 0.0
+        blueLabel.text = blueTextField.text
+        blueSlider.value = Float(blueTextField.text!) ?? 0.0
+        setColor()
+        return textField.resignFirstResponder()
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        redLabel.text = redTextField.text
+        redSlider.value = Float(redTextField.text!) ?? 0.0
+        greenLabel.text = greenTextField.text
+        greenSlider.value = Float(greenTextField.text!) ?? 0.0
+        blueLabel.text = blueTextField.text
+        blueSlider.value = Float(blueTextField.text!) ?? 0.0
+        setColor()
+        self.view.endEditing(true)
     }
 }
 

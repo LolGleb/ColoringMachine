@@ -7,7 +7,11 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+protocol EditColorViewControllerDelegate: AnyObject {
+    func saveColor (color: UIColor)
+}
+
+class EditColorViewController: UIViewController {
 
     @IBOutlet var coloredView: UIView!
     
@@ -18,6 +22,8 @@ class ViewController: UIViewController {
     @IBOutlet var redSlider: UISlider!
     @IBOutlet var greenSlider: UISlider!
     @IBOutlet var blueSlider: UISlider!
+    
+    weak var delegate: EditColorViewControllerDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,6 +56,12 @@ class ViewController: UIViewController {
         default: break
         }
     }
+    
+    @IBAction func doneButtonPressed(_ sender: Any) {
+        delegate?.saveColor(color: coloredView.backgroundColor ?? UIColor(red: 0/255, green: 0/255, blue: 0/255, alpha: 1))
+        dismiss(animated: true)
+    }
+    
     
     private func setColor() {
         coloredView.backgroundColor = UIColor(red: CGFloat(redSlider.value) / 255,
